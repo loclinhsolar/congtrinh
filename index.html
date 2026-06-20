@@ -523,6 +523,11 @@ function pick(id){
   current=id; ctPage=0; ctTime='all'; renderChips(); renderCt();
   var el=document.querySelector('.rchip.active');
   if(el&&el.parentNode.scrollTo){var b=el.parentNode;b.scrollTo({left:el.offsetLeft-b.clientWidth/2+el.clientWidth/2,behavior:'smooth'});}
+  // B: cập nhật pageMeta khi khách chọn khu vực
+  var vung = ORDER.find(function(v){return v.id===id;});
+  var tenKhu = vung ? vung.ten : id;
+  var soct = (CT[id]||[]).length;
+  pageMeta = '[Khách đang xem công trình] Khu vực đang xem: ' + tenKhu + ' (' + soct + ' công trình). Hỏi khách có ở khu vực này không và tư vấn phù hợp.';
 }
 
 // dựng 1 ô media (ảnh hoặc video facebook)
@@ -1359,6 +1364,7 @@ const PAGE_CONTEXT = 'congtrinh';
 ═══════════════════════════════════════ */
 let isOpen=false, busy=false, history=[], leadSubmitted=false;
 let formStep=1, formAns={};
+let pageMeta = '';          // context động: khu vực công trình đang xem
 const TOTAL_STEPS=6;
 
 const QR_INIT = [
@@ -1508,7 +1514,7 @@ async function llSendText(text) {
     const res=await fetch(WORKER_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:history,page_context:PAGE_CONTEXT}),
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:history,page_context:PAGE_CONTEXT,page_meta:pageMeta||undefined}),
     });
     const data=await res.json();
     const reply=data?.content?.[0]?.text||'Xin lỗi anh/chị, em gặp sự cố. Vui lòng gọi **0817.345.555** ạ!';
